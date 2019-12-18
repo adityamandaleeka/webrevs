@@ -1,0 +1,44 @@
+--- old/src/hotspot/cpu/x86/c1_FrameMap_x86.cpp	2019-12-17 19:43:17.353377223 -0800
++++ new/src/hotspot/cpu/x86/c1_FrameMap_x86.cpp	2019-12-17 19:43:17.125378874 -0800
+@@ -54,6 +54,8 @@
+       opr = as_oop_opr(reg);
+     } else if (type == T_METADATA) {
+       opr = as_metadata_opr(reg);
++    } else if (type == T_ADDRESS) {
++      opr = as_address_opr(reg);
+     } else {
+       opr = as_opr(reg);
+     }
+--- old/src/hotspot/cpu/x86/c1_LIRAssembler_x86.cpp	2019-12-17 19:43:18.081371954 -0800
++++ new/src/hotspot/cpu/x86/c1_LIRAssembler_x86.cpp	2019-12-17 19:43:17.861373547 -0800
+@@ -935,7 +935,7 @@
+     if (is_reference_type(type)) {
+       __ verify_oop(src->as_register());
+       __ movptr (dst, src->as_register());
+-    } else if (type == T_METADATA) {
++    } else if (type == T_METADATA || type == T_ADDRESS) {
+       __ movptr (dst, src->as_register());
+     } else {
+       __ movl (dst, src->as_register());
+@@ -1116,7 +1116,7 @@
+     if (is_reference_type(type)) {
+       __ movptr(dest->as_register(), frame_map()->address_for_slot(src->single_stack_ix()));
+       __ verify_oop(dest->as_register());
+-    } else if (type == T_METADATA) {
++    } else if (type == T_METADATA || type == T_ADDRESS) {
+       __ movptr(dest->as_register(), frame_map()->address_for_slot(src->single_stack_ix()));
+     } else {
+       __ movl(dest->as_register(), frame_map()->address_for_slot(src->single_stack_ix()));
+--- old/src/hotspot/share/c1/c1_FrameMap.hpp	2019-12-17 19:43:18.805366714 -0800
++++ new/src/hotspot/share/c1/c1_FrameMap.hpp	2019-12-17 19:43:18.577368364 -0800
+@@ -185,6 +185,10 @@
+     return LIR_OprFact::single_cpu_metadata(cpu_reg2rnr(r));
+   }
+ 
++  static LIR_Opr as_address_opr(Register r) {
++    return LIR_OprFact::single_cpu_address(cpu_reg2rnr(r));
++  }
++
+   FrameMap(ciMethod* method, int monitors, int reserved_argument_area_size);
+   bool finalize_frame(int nof_slots);
+ 

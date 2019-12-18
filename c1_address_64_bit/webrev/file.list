@@ -1,0 +1,3 @@
+src/hotspot/cpu/x86/c1_FrameMap_x86.cpp
+src/hotspot/cpu/x86/c1_LIRAssembler_x86.cpp
+src/hotspot/share/c1/c1_FrameMap.hpp

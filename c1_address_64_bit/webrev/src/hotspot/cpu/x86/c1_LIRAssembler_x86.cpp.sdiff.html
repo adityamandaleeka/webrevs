@@ -1,0 +1,269 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1" />
+<!--
+   Note to customizers: the body of the webrev is IDed as SUNWwebrev
+   to allow easy overriding by users of webrev via the userContent.css
+   mechanism available in some browsers.
+
+   For example, to have all "removed" information be red instead of
+   brown, set a rule in your userContent.css file like:
+
+       body#SUNWwebrev span.removed { color: red ! important; }
+-->
+<style type="text/css" media="screen">
+body {
+    background-color: #eeeeee;
+}
+hr {
+    border: none 0;
+    border-top: 1px solid #aaa;
+    height: 1px;
+}
+div.summary {
+    font-size: .8em;
+    border-bottom: 1px solid #aaa;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+div.summary h2 {
+    margin-bottom: 0.3em;
+}
+div.summary table th {
+    text-align: right;
+    vertical-align: top;
+    white-space: nowrap;
+}
+span.lineschanged {
+    font-size: 0.7em;
+}
+span.oldmarker {
+    color: red;
+    font-size: large;
+    font-weight: bold;
+}
+span.newmarker {
+    color: green;
+    font-size: large;
+    font-weight: bold;
+}
+span.removed {
+    color: brown;
+}
+span.changed {
+    color: blue;
+}
+span.new {
+    color: blue;
+    font-weight: bold;
+}
+a.print { font-size: x-small; }
+
+</style>
+
+<style type="text/css" media="print">
+pre { font-size: 0.8em; font-family: courier, monospace; }
+span.removed { color: #444; font-style: italic }
+span.changed { font-weight: bold; }
+span.new { font-weight: bold; }
+span.newmarker { font-size: 1.2em; font-weight: bold; }
+span.oldmarker { font-size: 1.2em; font-weight: bold; }
+a.print {display: none}
+hr { border: none 0; border-top: 1px solid #aaa; height: 1px; }
+</style>
+
+<title>jdk Sdiff src/hotspot/cpu/x86 </title>
+</head><body id="SUNWwebrev">
+<center><a href='../../../../src/hotspot/cpu/x86/c1_FrameMap_x86.cpp.sdiff.html' target='_top'>&lt prev</a> <a href='../../../../index.html' target='_top'>index</a> <a href='../../../../src/hotspot/share/c1/c1_FrameMap.hpp.sdiff.html' target='_top'>next &gt</a></center>
+<h2>src/hotspot/cpu/x86/c1_LIRAssembler_x86.cpp</h2>
+<a class="print" href="javascript:print()">Print this page</a>
+<pre></pre>
+
+<table><tr valign="top">
+<td><pre>
+
+</pre><hr></hr><pre>
+ 918     __ movdbl(dest-&gt;as_xmm_double_reg(), src-&gt;as_xmm_double_reg());
+ 919 
+ 920     // move between fpu-registers (no instruction necessary because of fpu-stack)
+ 921   } else if (dest-&gt;is_single_fpu() || dest-&gt;is_double_fpu()) {
+ 922     assert(src-&gt;is_single_fpu() || src-&gt;is_double_fpu(), "must match");
+ 923     assert(src-&gt;fpu() == dest-&gt;fpu(), "currently should be nothing to do");
+ 924   } else {
+ 925     ShouldNotReachHere();
+ 926   }
+ 927 }
+ 928 
+ 929 void LIR_Assembler::reg2stack(LIR_Opr src, LIR_Opr dest, BasicType type, bool pop_fpu_stack) {
+ 930   assert(src-&gt;is_register(), "should not call otherwise");
+ 931   assert(dest-&gt;is_stack(), "should not call otherwise");
+ 932 
+ 933   if (src-&gt;is_single_cpu()) {
+ 934     Address dst = frame_map()-&gt;address_for_slot(dest-&gt;single_stack_ix());
+ 935     if (is_reference_type(type)) {
+ 936       __ verify_oop(src-&gt;as_register());
+ 937       __ movptr (dst, src-&gt;as_register());
+<span class="changed"> 938     } else if (type == T_METADATA) {</span>
+ 939       __ movptr (dst, src-&gt;as_register());
+ 940     } else {
+ 941       __ movl (dst, src-&gt;as_register());
+ 942     }
+ 943 
+ 944   } else if (src-&gt;is_double_cpu()) {
+ 945     Address dstLO = frame_map()-&gt;address_for_slot(dest-&gt;double_stack_ix(), lo_word_offset_in_bytes);
+ 946     Address dstHI = frame_map()-&gt;address_for_slot(dest-&gt;double_stack_ix(), hi_word_offset_in_bytes);
+ 947     __ movptr (dstLO, src-&gt;as_register_lo());
+ 948     NOT_LP64(__ movptr (dstHI, src-&gt;as_register_hi()));
+ 949 
+ 950   } else if (src-&gt;is_single_xmm()) {
+ 951     Address dst_addr = frame_map()-&gt;address_for_slot(dest-&gt;single_stack_ix());
+ 952     __ movflt(dst_addr, src-&gt;as_xmm_float_reg());
+ 953 
+ 954   } else if (src-&gt;is_double_xmm()) {
+ 955     Address dst_addr = frame_map()-&gt;address_for_slot(dest-&gt;double_stack_ix());
+ 956     __ movdbl(dst_addr, src-&gt;as_xmm_double_reg());
+ 957 
+ 958   } else if (src-&gt;is_single_fpu()) {
+
+</pre><hr></hr><pre>
+1099       ShouldNotReachHere();
+1100   }
+1101   if (info != NULL) {
+1102     add_debug_info_for_null_check(null_check_here, info);
+1103   }
+1104 
+1105   if (patch_code != lir_patch_none) {
+1106     patching_epilog(patch, patch_code, to_addr-&gt;base()-&gt;as_register(), info);
+1107   }
+1108 }
+1109 
+1110 
+1111 void LIR_Assembler::stack2reg(LIR_Opr src, LIR_Opr dest, BasicType type) {
+1112   assert(src-&gt;is_stack(), "should not call otherwise");
+1113   assert(dest-&gt;is_register(), "should not call otherwise");
+1114 
+1115   if (dest-&gt;is_single_cpu()) {
+1116     if (is_reference_type(type)) {
+1117       __ movptr(dest-&gt;as_register(), frame_map()-&gt;address_for_slot(src-&gt;single_stack_ix()));
+1118       __ verify_oop(dest-&gt;as_register());
+<span class="changed">1119     } else if (type == T_METADATA) {</span>
+1120       __ movptr(dest-&gt;as_register(), frame_map()-&gt;address_for_slot(src-&gt;single_stack_ix()));
+1121     } else {
+1122       __ movl(dest-&gt;as_register(), frame_map()-&gt;address_for_slot(src-&gt;single_stack_ix()));
+1123     }
+1124 
+1125   } else if (dest-&gt;is_double_cpu()) {
+1126     Address src_addr_LO = frame_map()-&gt;address_for_slot(src-&gt;double_stack_ix(), lo_word_offset_in_bytes);
+1127     Address src_addr_HI = frame_map()-&gt;address_for_slot(src-&gt;double_stack_ix(), hi_word_offset_in_bytes);
+1128     __ movptr(dest-&gt;as_register_lo(), src_addr_LO);
+1129     NOT_LP64(__ movptr(dest-&gt;as_register_hi(), src_addr_HI));
+1130 
+1131   } else if (dest-&gt;is_single_xmm()) {
+1132     Address src_addr = frame_map()-&gt;address_for_slot(src-&gt;single_stack_ix());
+1133     __ movflt(dest-&gt;as_xmm_float_reg(), src_addr);
+1134 
+1135   } else if (dest-&gt;is_double_xmm()) {
+1136     Address src_addr = frame_map()-&gt;address_for_slot(src-&gt;double_stack_ix());
+1137     __ movdbl(dest-&gt;as_xmm_double_reg(), src_addr);
+1138 
+1139   } else if (dest-&gt;is_single_fpu()) {
+
+</pre><hr></hr>
+</pre></td><td><pre>
+
+</pre><hr></hr><pre>
+ 918     __ movdbl(dest-&gt;as_xmm_double_reg(), src-&gt;as_xmm_double_reg());
+ 919 
+ 920     // move between fpu-registers (no instruction necessary because of fpu-stack)
+ 921   } else if (dest-&gt;is_single_fpu() || dest-&gt;is_double_fpu()) {
+ 922     assert(src-&gt;is_single_fpu() || src-&gt;is_double_fpu(), "must match");
+ 923     assert(src-&gt;fpu() == dest-&gt;fpu(), "currently should be nothing to do");
+ 924   } else {
+ 925     ShouldNotReachHere();
+ 926   }
+ 927 }
+ 928 
+ 929 void LIR_Assembler::reg2stack(LIR_Opr src, LIR_Opr dest, BasicType type, bool pop_fpu_stack) {
+ 930   assert(src-&gt;is_register(), "should not call otherwise");
+ 931   assert(dest-&gt;is_stack(), "should not call otherwise");
+ 932 
+ 933   if (src-&gt;is_single_cpu()) {
+ 934     Address dst = frame_map()-&gt;address_for_slot(dest-&gt;single_stack_ix());
+ 935     if (is_reference_type(type)) {
+ 936       __ verify_oop(src-&gt;as_register());
+ 937       __ movptr (dst, src-&gt;as_register());
+<span class="changed"> 938     } else if (type == T_METADATA || type == T_ADDRESS) {</span>
+ 939       __ movptr (dst, src-&gt;as_register());
+ 940     } else {
+ 941       __ movl (dst, src-&gt;as_register());
+ 942     }
+ 943 
+ 944   } else if (src-&gt;is_double_cpu()) {
+ 945     Address dstLO = frame_map()-&gt;address_for_slot(dest-&gt;double_stack_ix(), lo_word_offset_in_bytes);
+ 946     Address dstHI = frame_map()-&gt;address_for_slot(dest-&gt;double_stack_ix(), hi_word_offset_in_bytes);
+ 947     __ movptr (dstLO, src-&gt;as_register_lo());
+ 948     NOT_LP64(__ movptr (dstHI, src-&gt;as_register_hi()));
+ 949 
+ 950   } else if (src-&gt;is_single_xmm()) {
+ 951     Address dst_addr = frame_map()-&gt;address_for_slot(dest-&gt;single_stack_ix());
+ 952     __ movflt(dst_addr, src-&gt;as_xmm_float_reg());
+ 953 
+ 954   } else if (src-&gt;is_double_xmm()) {
+ 955     Address dst_addr = frame_map()-&gt;address_for_slot(dest-&gt;double_stack_ix());
+ 956     __ movdbl(dst_addr, src-&gt;as_xmm_double_reg());
+ 957 
+ 958   } else if (src-&gt;is_single_fpu()) {
+
+</pre><hr></hr><pre>
+1099       ShouldNotReachHere();
+1100   }
+1101   if (info != NULL) {
+1102     add_debug_info_for_null_check(null_check_here, info);
+1103   }
+1104 
+1105   if (patch_code != lir_patch_none) {
+1106     patching_epilog(patch, patch_code, to_addr-&gt;base()-&gt;as_register(), info);
+1107   }
+1108 }
+1109 
+1110 
+1111 void LIR_Assembler::stack2reg(LIR_Opr src, LIR_Opr dest, BasicType type) {
+1112   assert(src-&gt;is_stack(), "should not call otherwise");
+1113   assert(dest-&gt;is_register(), "should not call otherwise");
+1114 
+1115   if (dest-&gt;is_single_cpu()) {
+1116     if (is_reference_type(type)) {
+1117       __ movptr(dest-&gt;as_register(), frame_map()-&gt;address_for_slot(src-&gt;single_stack_ix()));
+1118       __ verify_oop(dest-&gt;as_register());
+<span class="changed">1119     } else if (type == T_METADATA || type == T_ADDRESS) {</span>
+1120       __ movptr(dest-&gt;as_register(), frame_map()-&gt;address_for_slot(src-&gt;single_stack_ix()));
+1121     } else {
+1122       __ movl(dest-&gt;as_register(), frame_map()-&gt;address_for_slot(src-&gt;single_stack_ix()));
+1123     }
+1124 
+1125   } else if (dest-&gt;is_double_cpu()) {
+1126     Address src_addr_LO = frame_map()-&gt;address_for_slot(src-&gt;double_stack_ix(), lo_word_offset_in_bytes);
+1127     Address src_addr_HI = frame_map()-&gt;address_for_slot(src-&gt;double_stack_ix(), hi_word_offset_in_bytes);
+1128     __ movptr(dest-&gt;as_register_lo(), src_addr_LO);
+1129     NOT_LP64(__ movptr(dest-&gt;as_register_hi(), src_addr_HI));
+1130 
+1131   } else if (dest-&gt;is_single_xmm()) {
+1132     Address src_addr = frame_map()-&gt;address_for_slot(src-&gt;single_stack_ix());
+1133     __ movflt(dest-&gt;as_xmm_float_reg(), src_addr);
+1134 
+1135   } else if (dest-&gt;is_double_xmm()) {
+1136     Address src_addr = frame_map()-&gt;address_for_slot(src-&gt;double_stack_ix());
+1137     __ movdbl(dest-&gt;as_xmm_double_reg(), src_addr);
+1138 
+1139   } else if (dest-&gt;is_single_fpu()) {
+
+</pre><hr></hr>
+</pre></td>
+</tr></table>
+<center><a href='../../../../src/hotspot/cpu/x86/c1_FrameMap_x86.cpp.sdiff.html' target='_top'>&lt prev</a> <a href='../../../../index.html' target='_top'>index</a> <a href='../../../../src/hotspot/share/c1/c1_FrameMap.hpp.sdiff.html' target='_top'>next &gt</a></center>
+</body></html>

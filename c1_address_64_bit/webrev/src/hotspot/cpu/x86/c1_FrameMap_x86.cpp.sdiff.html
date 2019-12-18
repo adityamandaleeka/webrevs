@@ -1,0 +1,185 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta charset="utf-8">
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="-1" />
+<!--
+   Note to customizers: the body of the webrev is IDed as SUNWwebrev
+   to allow easy overriding by users of webrev via the userContent.css
+   mechanism available in some browsers.
+
+   For example, to have all "removed" information be red instead of
+   brown, set a rule in your userContent.css file like:
+
+       body#SUNWwebrev span.removed { color: red ! important; }
+-->
+<style type="text/css" media="screen">
+body {
+    background-color: #eeeeee;
+}
+hr {
+    border: none 0;
+    border-top: 1px solid #aaa;
+    height: 1px;
+}
+div.summary {
+    font-size: .8em;
+    border-bottom: 1px solid #aaa;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+div.summary h2 {
+    margin-bottom: 0.3em;
+}
+div.summary table th {
+    text-align: right;
+    vertical-align: top;
+    white-space: nowrap;
+}
+span.lineschanged {
+    font-size: 0.7em;
+}
+span.oldmarker {
+    color: red;
+    font-size: large;
+    font-weight: bold;
+}
+span.newmarker {
+    color: green;
+    font-size: large;
+    font-weight: bold;
+}
+span.removed {
+    color: brown;
+}
+span.changed {
+    color: blue;
+}
+span.new {
+    color: blue;
+    font-weight: bold;
+}
+a.print { font-size: x-small; }
+
+</style>
+
+<style type="text/css" media="print">
+pre { font-size: 0.8em; font-family: courier, monospace; }
+span.removed { color: #444; font-style: italic }
+span.changed { font-weight: bold; }
+span.new { font-weight: bold; }
+span.newmarker { font-size: 1.2em; font-weight: bold; }
+span.oldmarker { font-size: 1.2em; font-weight: bold; }
+a.print {display: none}
+hr { border: none 0; border-top: 1px solid #aaa; height: 1px; }
+</style>
+
+<title>jdk Sdiff src/hotspot/cpu/x86 </title>
+</head><body id="SUNWwebrev">
+<center>&lt prev <a href='../../../../index.html' target='_top'>index</a> <a href='../../../../src/hotspot/cpu/x86/c1_LIRAssembler_x86.cpp.sdiff.html' target='_top'>next &gt</a></center>
+<h2>src/hotspot/cpu/x86/c1_FrameMap_x86.cpp</h2>
+<a class="print" href="javascript:print()">Print this page</a>
+<pre></pre>
+
+<table><tr valign="top">
+<td><pre>
+
+</pre><hr></hr><pre>
+  37   if (r_1-&gt;is_stack()) {
+  38     // Convert stack slot to an SP offset
+  39     // The calling convention does not count the SharedRuntime::out_preserve_stack_slots() value
+  40     // so we must add it in here.
+  41     int st_off = (r_1-&gt;reg2stack() + SharedRuntime::out_preserve_stack_slots()) * VMRegImpl::stack_slot_size;
+  42     opr = LIR_OprFact::address(new LIR_Address(rsp_opr, st_off, type));
+  43   } else if (r_1-&gt;is_Register()) {
+  44     Register reg = r_1-&gt;as_Register();
+  45     if (r_2-&gt;is_Register() &amp;&amp; (type == T_LONG || type == T_DOUBLE)) {
+  46       Register reg2 = r_2-&gt;as_Register();
+  47 #ifdef _LP64
+  48       assert(reg2 == reg, "must be same register");
+  49       opr = as_long_opr(reg);
+  50 #else
+  51       opr = as_long_opr(reg2, reg);
+  52 #endif // _LP64
+  53     } else if (is_reference_type(type)) {
+  54       opr = as_oop_opr(reg);
+  55     } else if (type == T_METADATA) {
+  56       opr = as_metadata_opr(reg);
+
+
+  57     } else {
+  58       opr = as_opr(reg);
+  59     }
+  60   } else if (r_1-&gt;is_FloatRegister()) {
+  61     assert(type == T_DOUBLE || type == T_FLOAT, "wrong type");
+  62     int num = r_1-&gt;as_FloatRegister()-&gt;encoding();
+  63     if (type == T_FLOAT) {
+  64       opr = LIR_OprFact::single_fpu(num);
+  65     } else {
+  66       opr = LIR_OprFact::double_fpu(num);
+  67     }
+  68   } else if (r_1-&gt;is_XMMRegister()) {
+  69     assert(type == T_DOUBLE || type == T_FLOAT, "wrong type");
+  70     int num = r_1-&gt;as_XMMRegister()-&gt;encoding();
+  71     if (type == T_FLOAT) {
+  72       opr = LIR_OprFact::single_xmm(num);
+  73     } else {
+  74       opr = LIR_OprFact::double_xmm(num);
+  75     }
+  76   } else {
+
+</pre><hr></hr>
+</pre></td><td><pre>
+
+</pre><hr></hr><pre>
+  37   if (r_1-&gt;is_stack()) {
+  38     // Convert stack slot to an SP offset
+  39     // The calling convention does not count the SharedRuntime::out_preserve_stack_slots() value
+  40     // so we must add it in here.
+  41     int st_off = (r_1-&gt;reg2stack() + SharedRuntime::out_preserve_stack_slots()) * VMRegImpl::stack_slot_size;
+  42     opr = LIR_OprFact::address(new LIR_Address(rsp_opr, st_off, type));
+  43   } else if (r_1-&gt;is_Register()) {
+  44     Register reg = r_1-&gt;as_Register();
+  45     if (r_2-&gt;is_Register() &amp;&amp; (type == T_LONG || type == T_DOUBLE)) {
+  46       Register reg2 = r_2-&gt;as_Register();
+  47 #ifdef _LP64
+  48       assert(reg2 == reg, "must be same register");
+  49       opr = as_long_opr(reg);
+  50 #else
+  51       opr = as_long_opr(reg2, reg);
+  52 #endif // _LP64
+  53     } else if (is_reference_type(type)) {
+  54       opr = as_oop_opr(reg);
+  55     } else if (type == T_METADATA) {
+  56       opr = as_metadata_opr(reg);
+<span class="new">  57     } else if (type == T_ADDRESS) {</span>
+<span class="new">  58       opr = as_address_opr(reg);</span>
+  59     } else {
+  60       opr = as_opr(reg);
+  61     }
+  62   } else if (r_1-&gt;is_FloatRegister()) {
+  63     assert(type == T_DOUBLE || type == T_FLOAT, "wrong type");
+  64     int num = r_1-&gt;as_FloatRegister()-&gt;encoding();
+  65     if (type == T_FLOAT) {
+  66       opr = LIR_OprFact::single_fpu(num);
+  67     } else {
+  68       opr = LIR_OprFact::double_fpu(num);
+  69     }
+  70   } else if (r_1-&gt;is_XMMRegister()) {
+  71     assert(type == T_DOUBLE || type == T_FLOAT, "wrong type");
+  72     int num = r_1-&gt;as_XMMRegister()-&gt;encoding();
+  73     if (type == T_FLOAT) {
+  74       opr = LIR_OprFact::single_xmm(num);
+  75     } else {
+  76       opr = LIR_OprFact::double_xmm(num);
+  77     }
+  78   } else {
+
+</pre><hr></hr>
+</pre></td>
+</tr></table>
+<center>&lt prev <a href='../../../../index.html' target='_top'>index</a> <a href='../../../../src/hotspot/cpu/x86/c1_LIRAssembler_x86.cpp.sdiff.html' target='_top'>next &gt</a></center>
+</body></html>
